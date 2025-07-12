@@ -19,7 +19,7 @@ Whether you're chatting through a bot or triggering actions via an automation pl
 Once processed, the entry is updated in Google Sheets, and you’ll receive a brief confirmation message.
 ## 📦 Technologies Used
 - n8n for orchestration and automation
-- OpenAI or similar LLM for natural language processing
+- Gemini 2.5 and DeepSeek
 - Telegram Bot for user interaction
 - Google Sheets API for data storage
 ## 💡 Why This Project?
