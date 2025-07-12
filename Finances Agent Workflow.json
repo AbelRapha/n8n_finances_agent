@@ -1,0 +1,1277 @@
+{
+  "name": "Finances Agent Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/<insira o ID da sua planilha>/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Finanças Pessoal",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        2180,
+        -280
+      ],
+      "id": "<insira o ID da sua planilha>",
+      "name": "PlanilhaFinancasPessoais",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PFQlYIz6A4gRyRcD",
+          "name": "Conexão com o Google"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Agente de consulta",
+        "height": 380,
+        "width": 920
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        -500
+      ],
+      "id": "d21f8036-c456-4961-9a01-ecb04ef33890",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Agente de inserir dados",
+        "height": 400,
+        "width": 920
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        -920
+      ],
+      "id": "<insira o ID da sua planilha>",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Agente de classificação para saber se é inserção, consulta, deleção ou atualização de informações de finanças",
+        "height": 580,
+        "width": 580
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        -320
+      ],
+      "id": "04031b14-dbf1-4a85-b2d1-40eaa091470c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Integração com o telegram\n",
+        "height": 300,
+        "width": 340
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        740,
+        -220
+      ],
+      "id": "3fa7afe6-5f7d-4bb5-a004-5fdb08a61e3c",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        900,
+        -120
+      ],
+      "id": "805f6c69-2b8b-493c-9137-7d4fe86e861a",
+      "name": "Telegram Trigger",
+      "webhookId": "f775b072-06b3-4836-87ea-b0c0fcbcf3a3",
+      "credentials": {
+        "telegramApi": {
+          "id": "dEUeHz4QJCJOucIj",
+          "name": "Agente finanças Abel"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2460,
+        -440
+      ],
+      "id": "931977f9-31f5-48c0-959c-546d506d1175",
+      "name": "Send a text message",
+      "webhookId": "7b0eeb23-5831-4c59-a85f-f988038a4a47",
+      "credentials": {
+        "telegramApi": {
+          "id": "dEUeHz4QJCJOucIj",
+          "name": "Agente finanças"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=A seguir, você receberá uma mensagem que descreve uma despesa ou uma receita. Extraia os seguintes campos dessa mensagem:\n\n- Id: {{Math.floor(Math.random()*999999999)}}\n- Data (a data que foi feito o gasto ou a data do recebimento dessa receita, caso não seja especificado utilize a data de hoje, sempre assim: 2025-07-11, utilizando sempre esse formato YYYY-MM-DD).\n- Descrição resumida do que foi gasto ou do que foi recebido como receita\n- Valor (dado numérico em reais, moeda brasileira. Ex: R$ 150 ou \"Gastei 150 reais\")\n- Categoria (ex: Transporte, Refeição, Salário, Dividendo, Outros ganhos, Serviços, Empréstimo, Lazer, Saúde e Outros gastos)\n- Despesa (Diga se é ou não uma despesa de forma objetiva com \"SIM\" ou \"NÃO\"\n- Parcelado? (Diga se a despesa foi parcelado ou não de forma objetiva com \"SIM\" ou \"NÃO\").\n- N Parcelas (Caso seja informado a quantidade de parcelas feitas para a despesa, coloque o valor numérico da quantidade de vezes que foi parcelado, ex: 7x = 7. Caso não seja especificado ou seja uma receita coloque o número 0.)\n- Status (Diga o status dessa despesa ou receita, se já foi realizado a despesa ou a receita foi obtida coloque como \"OK\", caso contrário coloque como \"PENDENTE\".)\n- forma de pagamento (Forma de recebimento da receita ou forma de pagamento da despesa. Pode ser em \"Pix\", \"Cartão de Crédito\", \"Cartão de Débito\".)\n- Resumo da operação que foi feita, para ser enviado via mensagem de confirmação por um assistente. A mensagem deve ser objetiva , como se fosse enviada por um atendente no WhatsApp.\n\nMensagem:\n{{ $json.message.text }}\n\nData de Hoje:\n{{ $now }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Você é um assistente financeiro. Sua função é interpretar mensagens de textos com a finalidade de executar os pedidos solicitados pelo usuário. Extraia os dados de forma estruturada com o objetivo de preencher uma planilha de controle de gastos.\n\nAlém disso, você deve gerar uma frase de confirmação no campo \"resumo\", em tom simpático e direto, como se fosse um atendente humano respondendo no WhatsApp. O texto deve confirmar que a despesa foi registrada com sucesso, citando os principais dados como valor, categoria, Dizer se é uma Despesa ou não, Compra é Parcelada?, Quantidade de Parcelas, Status se esta pago ou pendente."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        -860
+      ],
+      "id": "847cf742-4974-4f98-a688-e533e10d5037",
+      "name": "Agente de inserção dos dados"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"Id\": 461246929,\n  \"Data\": \"10-07-2025\",\n  \"Categoria\": \"Alimentação\",\n  \"Descrição\": \"Pizza\",\n  \"Despesa\": \"Despesa\",\n  \"Valor\": 20,\n  \"Parcelado?\": \"NÃO\" ,\n  \"Quantidade de Parcelas\": 0,\n  \"Status\": \"OK\",\n  \"Forma de pagamento\": \"Cartão de crédito\",\n  \"Resumo\": \"Despesa registrada: R$ 20,00 em Pizza, status OK, pago\"\t\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2140,
+        -680
+      ],
+      "id": "3f20387f-ba8e-4664-9183-e4abee594af5",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        80
+      ],
+      "id": "3589760f-e9fd-4ccf-ad90-143a1bf76038",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "xvKcNo4zckGGdl8f",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/<insira o ID da sua planilha>/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Finanças Pessoal",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ $json.output.Data }}",
+            "Descrição": "={{ $json.output['Descrição'] }}",
+            "Categoria": "={{ $json.output.Categoria }}",
+            "Despesa": "={{ $json.output.Despesa }}",
+            "Valor": "={{ $json.output.Valor }}",
+            "Parcelado?": "={{ $json.output['Parcelado?'] }}",
+            "N Parcelas": "={{ $json.output['Quantidade de Parcelas'] }}",
+            "Status": "={{ $json.output.Status }}",
+            "Id": "={{ $json.output.Id }}",
+            "Forma de Pagamento": "={{ $json.output['Forma de pagamento'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Id",
+              "displayName": "Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Descrição",
+              "displayName": "Descrição",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Categoria",
+              "displayName": "Categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Despesa",
+              "displayName": "Despesa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Valor",
+              "displayName": "Valor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Parcelado?",
+              "displayName": "Parcelado?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "N Parcelas",
+              "displayName": "N Parcelas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Forma de Pagamento",
+              "displayName": "Forma de Pagamento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2300,
+        -860
+      ],
+      "id": "a895f266-74c5-43bf-8d40-3edfc69c33d9",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PFQlYIz6A4gRyRcD",
+          "name": "Conexão com o Google (contatobeldev)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        -680
+      ],
+      "id": "139e7dde-b327-4a9c-a633-2f6822d312c9",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "xvKcNo4zckGGdl8f",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=Você é um assistente financeiro. Sua função é responder a perguntas sobre despesas e não despesas anteriores, consultando uma planilha com registros diários.\n\nFerramentas disponíveis:\n- 'PlanilhaFinancasPessoais': retorna registros filtrados por data.\n- 'calculator': soma valores e conta registros.\n\nRegras:\n1. Sempre que a pergunta mencionar períodos como “hoje”, “ontem”, “semana passada”, converta esses períodos para o formato YYYY-MM-DD **antes de usar a ferramenta da planilha**.\n2. Use o campo 'Data' da planilha para filtrar os resultados.\n3. Considere que a data atual é {{ $now }}.\n4. Exemplo: Se {{ $now }} for '2025-07-11' e a pergunta for \"ontem\", consulte registros com data '2025-07-10'. Nunca use a data de hoje se a pergunta for \"ontem\".\n5. A resposta final deve ser uma frase única, sucinta, no estilo WhatsApp, sempre atenciosa e cordial."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        2060,
+        -440
+      ],
+      "id": "1e7ddf8f-e4dd-432c-aa9f-5996520a8a2e",
+      "name": "Agente de consulta"
+    },
+    {
+      "parameters": {
+        "inputText": "=Você receberá uma mensagem de um usuário contendo informações relacionadas a finanças pessoais.\nSua tarefa é identificar e classificar a única intenção principal da mensagem com base exclusivamente nas categorias abaixo. A análise deve considerar tanto o conteúdo explícito quanto o contexto implícito. Apenas uma das categorias deve ser marcada como true; todas as demais devem ser false. Sempre priorize a ação solicitada pelo usuário, mesmo que não esteja declarada de forma direta.\nCategorias de intenção:\n- \"registro\" → Marque como true se a mensagem representar o registro de uma nova despesa ou receita. Pode ser uma afirmação simples como “Gastei R$ 50 com gasolina hoje” ou “Recebi R$ 200 de um freela”. Indica entrada inédita.\n- \"consulta\" → Marque como true se o usuário estiver buscando visualizar ou acessar informações financeiras anteriores. Exemplos: “Quais foram minhas despesas este mês?” ou “Me mostra meus registros de março”.\n- \"atualização\" → Marque como true se houver intenção de modificar dados previamente registrados, como valor, categoria ou data. Exemplo: “Corrige o valor da pizza para R$ 45” ou “Troca ‘Uber’ por ‘99’ naquela corrida de ontem”.\n- \"remoção\" → Marque como true se a mensagem indicar que o usuário deseja excluir um registro financeiro existente. Exemplos: “Apaga aquela compra no mercado” ou “Remove o pagamento do boleto duplicado”.\n Caso a mensagem seja ambígua, escolha a opção que represente a ação mais diretamente relacionada à intenção dominante. Não é permitido marcar mais de uma categoria como true\n\nMensagem:\n {{ $json.message.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "registro",
+              "description": "- se a mensagem representar o registro, ou cadastro,  de uma nova despesa ou receita. Pode ser uma afirmação simples como “Gastei R$ 50 com gasolina hoje” ou “Recebi R$ 200 de um freela” ou \"Cadastre uma nova despesa com pizza no dia de hoje no valor de R$ 29,90\". Indica entrada inédita."
+            },
+            {
+              "category": "consulta",
+              "description": "- se o usuário estiver buscando visualizar ou acessar informações financeiras anteriores. Exemplos: “Quais foram minhas despesas este mês?” ou “Me mostra meus registros de março”."
+            },
+            {
+              "category": "atualização",
+              "description": "- se houver intenção de modificar dados previamente registrados, como valor, categoria ou data. Exemplo: “Corrige o valor da pizza para R$ 45” ou “Troca ‘Uber’ por ‘99’ naquela corrida de ontem”."
+            },
+            {
+              "category": "remoção",
+              "description": "- se a mensagem indicar que o usuário deseja excluir um registro financeiro existente. Exemplos: “Apaga aquela compra no mercado” ou “Remove o pagamento do boleto duplicado”."
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "Please classify the user’s message into exactly one of the following categories: registro, consulta, atualização, or remoção.\nYou must format your output as a valid JSON that adheres to the schema below.\nDo not return all categories as false. It is mandatory that one and only one category is marked true, and the others marked false.\nYour response must reflect the dominant intent in the message, even if it’s not perfectly clear. Avoid uncertainty.\nDo not include explanations. Output only the JSON inside the markdown code block.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        1220,
+        -140
+      ],
+      "id": "9b50804b-f1b3-439c-8a66-2626d72300ed",
+      "name": "Classificador da mensagem",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        2300,
+        -280
+      ],
+      "id": "42200fa1-ec94-4463-8c31-23729b8d76a4",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        2060,
+        -280
+      ],
+      "id": "86f73917-7586-4c97-9d11-f31c50343426",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "7VOpZZOdnuZ7CBL8",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=ID registrado: *{{ $json.Id }}*\n{{ $('Agente de inserção dos dados').item.json.output.Resumo }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2460,
+        -860
+      ],
+      "id": "d9f14632-f618-4827-80d3-0035c5cb8ac0",
+      "name": "Send a text message Inserção",
+      "webhookId": "45e2fc1c-3dcc-4e40-b7e5-c2617b9e641d",
+      "credentials": {
+        "telegramApi": {
+          "id": "dEUeHz4QJCJOucIj",
+          "name": "Agente finanças Abel"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Edit Fields2').item.json['Id sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Finanças Pessoal",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<insira o ID da sua planilha>/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Id": "={{ $('Edit Fields2').item.json['Id Consulta'] }}",
+            "Data": "={{ $json.output.Data }}",
+            "Descrição": "={{ $json.output['Descrição'] }}",
+            "Categoria": "={{ $json.output.Categoria }}",
+            "Despesa": "={{ $json.output.Despesa }}",
+            "Valor": "={{ $json.output.Valor }}",
+            "Parcelado?": "={{ $json.output['Parcelado?'] }}",
+            "N Parcelas": "={{ $json.output['Quantidade de Parcelas'] }}",
+            "Status": "={{ $json.output.Status }}",
+            "Forma de Pagamento": "={{ $json.output['Forma de pagamento'] }}"
+          },
+          "matchingColumns": [
+            "Id"
+          ],
+          "schema": [
+            {
+              "id": "Id",
+              "displayName": "Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Descrição",
+              "displayName": "Descrição",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Categoria",
+              "displayName": "Categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Despesa",
+              "displayName": "Despesa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Valor",
+              "displayName": "Valor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Parcelado?",
+              "displayName": "Parcelado?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "N Parcelas",
+              "displayName": "N Parcelas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Forma de Pagamento",
+              "displayName": "Forma de Pagamento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2780,
+        20
+      ],
+      "id": "e021bc11-e809-44e1-bb7d-c5a7272fdb62",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PFQlYIz6A4gRyRcD",
+          "name": "Conexão com o Google (contatobeldev)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=A seguir, você receberá uma mensagem que descreve uma despesa ou uma receita que precisa ser alterada. A seguir você receberá os valores que estão registrado no ID da planilha.\nE agora a partir da mensagem a seguir altere, nos dados contidos na base, apenas o que for solicitado pelo usuário na mensagem. Os demais permaneça como já está na planilha.\n\nMensagem:\n{{ $('Telegram Trigger').item.json.message.text }}\n\nDados existentes referente ao ID na base de dados:\n\n- Data: {{ $json.Data }}\n- Descrição:{{ $json['Descrição'] }}\n- Categoria:{{ $json.Categoria }}\n- Despesa:{{ $json.Despesa }}\n- Valor:{{ $json.Valor }}\n- Parcelado?:{{ $json['Parcelado?'] }}\n- Quantidade de Parcelas:{{ $json['N Parcelas'] }}\n- Status:{{ $json.Status }}\n- Forma de pagamento{{ $json['Forma de Pagamento'] }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Você é um assistente financeiro. Sua função é interpretar mensagens de textos com a finalidade de executar os pedidos solicitados pelo usuário. Extraia os dados de forma estruturada com o objetivo de preencher uma planilha de controle de gastos.\n\nAlém disso, você deve gerar uma frase de confirmação no campo \"resumo\", em tom simpático e direto, como se fosse um atendente humano respondendo no WhatsApp. O texto deve confirmar que a despesa foi registrada com sucesso, citando os principais dados como valor, categoria, Dizer se é uma Despesa ou não, Compra é Parcelada?, Quantidade de Parcelas, Status se esta pago ou pendente."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        2440,
+        20
+      ],
+      "id": "98e4a8e4-686c-4bb9-bd18-f46fc81d1a2c",
+      "name": "Agente de atualização"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"Data\": \"2025-07-10\",\n  \"Categoria\": \"Alimentação\",\n  \"Descrição\": \"Pizza\",\n  \"Despesa\": \"Despesa\",\n  \"Valor\": 20,\n  \"Parcelado?\": \"NÃO\" ,\n  \"Quantidade de Parcelas\": 0,\n  \"Status\": \"OK\",\n  \"Forma de pagamento\": \"Cartão de crédito\",\n  \"Resumo\": \"Despesa Atualizada: R$ 20,00 em Pizza, status OK, pago\"\t\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2600,
+        180
+      ],
+      "id": "05cbf3a6-8ad5-414e-845c-2235966e7d8a",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "text": "=Indentifique o valor de Id na mensagem a seguir e retorne o valor desse ID.\nMensagem:\n{{ $json.message.text }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n\t\"Id\": \"ahs8fj\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1800,
+        20
+      ],
+      "id": "d439555c-8d68-4eff-852f-8bf2bbd94f10",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        180
+      ],
+      "id": "31c5e509-314e-467c-b8f7-e88ab46068ce",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "xvKcNo4zckGGdl8f",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a01e238b-a48f-46aa-af8a-dc04cf9a28b8",
+              "name": "Id sheet",
+              "value": "<insira o ID da sua planilha>",
+              "type": "string"
+            },
+            {
+              "id": "ed2f589d-0f05-4118-aca7-cef6e0004647",
+              "name": "Id Consulta",
+              "value": "={{ $json.output.Id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2080,
+        20
+      ],
+      "id": "ddd68b29-0dea-47a7-9414-6006f0a85bca",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $json['Id sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Finanças Pessoal",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<insira o ID da sua planilha>/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Id",
+              "lookupValue": "={{ $json['Id Consulta'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2240,
+        20
+      ],
+      "id": "1afe6f94-b209-4f29-aa07-6ea122840d7a",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PFQlYIz6A4gRyRcD",
+          "name": "Conexão com o Google (contatobeldev)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        180
+      ],
+      "id": "8723e981-85c3-4329-b9da-972956d482b0",
+      "name": "DeepSeek Chat Model1",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "7VOpZZOdnuZ7CBL8",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Dados do ID: *{{ $json.Id }}* alterados.\n{{ $('Agente de atualização').item.json.output.Resumo }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2980,
+        20
+      ],
+      "id": "133e0b4b-e8bd-4c05-bd53-9fcb77293111",
+      "name": "Send a text message1",
+      "webhookId": "b70b81fd-c12a-47df-9a13-ed69204bd597",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "dEUeHz4QJCJOucIj",
+          "name": "Agente finanças Abel"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Agente de Atualização dos dados baseados no Id da planilha",
+        "height": 420,
+        "width": 1460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        -100
+      ],
+      "id": "36dc4e49-1e9f-490f-887e-b15d6b1482ec",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "text": "=Indentifique o valor de Id na mensagem a seguir e retorne o valor desse ID.\nMensagem:\n{{ $json.message.text }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n\t\"Id\": \"ahs8fj\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1880,
+        420
+      ],
+      "id": "f6b7140e-a470-435a-89fe-b2211978980a",
+      "name": "Information Extractor1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1880,
+        580
+      ],
+      "id": "22ea5aef-76a8-44e9-a2d4-1f96e54a7f18",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "xvKcNo4zckGGdl8f",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a01e238b-a48f-46aa-af8a-dc04cf9a28b8",
+              "name": "Id sheet",
+              "value": "<insira o ID da sua planilha>",
+              "type": "string"
+            },
+            {
+              "id": "ed2f589d-0f05-4118-aca7-cef6e0004647",
+              "name": "Id Consulta",
+              "value": "={{ $json.output.Id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2160,
+        420
+      ],
+      "id": "a7fdba33-a47b-40a0-acc3-adcebd1262ed",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $json['Id sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Finanças Pessoal",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<insira o ID da sua planilha>/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Id",
+              "lookupValue": "={{ $json['Id Consulta'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2360,
+        420
+      ],
+      "id": "9a76dab8-e4d4-4408-9e4a-9b4702d44f17",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PFQlYIz6A4gRyRcD",
+          "name": "Conexão com o Google (contatobeldev)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=ID *{{ $('Edit Fields').item.json['Id Consulta'] }}* Removido com sucesso da base de dados. 😊",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2840,
+        420
+      ],
+      "id": "d1f6f99c-1975-4b08-8cea-805b89fdf6f3",
+      "name": "Send a text message2",
+      "webhookId": "b70b81fd-c12a-47df-9a13-ed69204bd597",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "dEUeHz4QJCJOucIj",
+          "name": "Agente finanças Abel"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Edit Fields').item.json['Id sheet'] }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Finanças Pessoal",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<insira o ID da sua planilha>/edit#gid=0"
+        },
+        "startIndex": "={{ $json.row_number }}"
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        2600,
+        420
+      ],
+      "id": "c3732aa9-0930-432e-a4fd-3533433396fd",
+      "name": "Delete rows or columns from sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PFQlYIz6A4gRyRcD",
+          "name": "Conexão com o Google (contatobeldev)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Agente para deleção a partir do ID",
+        "height": 380,
+        "width": 1460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        340
+      ],
+      "id": "8cd472aa-adb5-46ec-a279-be684d547a9e",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "PlanilhaFinancasPessoais": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de consulta",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Classificador da mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de inserção dos dados": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agente de inserção dos dados",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classificador da mensagem",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message Inserção",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de inserção dos dados",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de consulta": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classificador da mensagem": {
+      "main": [
+        [
+          {
+            "node": "Agente de inserção dos dados",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente de consulta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de consulta",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de consulta",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agente de atualização",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de atualização": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Agente de atualização",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de atualização",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete rows or columns from sheet1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Delete rows or columns from sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cca68329-45d6-49ee-9c62-d9c6709b9c37",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9c7a1a1c2012ddf82900535cafbdb097ca38567ecb5481360b4c28818731e4eb"
+  },
+  "id": "0k1TygQx6h7QddK4",
+  "tags": []
+}
